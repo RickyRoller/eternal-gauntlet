@@ -1,0 +1,156 @@
+{
+  "enemy_spawns": [
+    {
+      "id": "",
+      "race": "Undead",
+      "power": "1",
+      "count": 100,
+      "start_time": "0:00",
+      "end_time": "0:30"
+    },
+    {
+      "id": "",
+      "race": "Orc",
+      "power": "1",
+      "count": 100,
+      "start_time": "0:15",
+      "end_time": "0:45"
+    },
+    {
+      "id": "",
+      "race": "Demon",
+      "power": "1",
+      "count": 100,
+      "start_time": "0:30",
+      "end_time": "1:00"
+    },
+    {
+      "id": "",
+      "race": "Undead",
+      "power": "2",
+      "count": 100,
+      "start_time": "0:45",
+      "end_time": "1:15"
+    },
+    {
+      "id": "",
+      "race": "Orc",
+      "power": "2",
+      "count": 100,
+      "start_time": "1:00",
+      "end_time": "1:30"
+    },
+    {
+      "id": "",
+      "race": "Demon",
+      "power": "2",
+      "count": 100,
+      "start_time": "1:15",
+      "end_time": "1:45"
+    },
+    {
+      "id": "",
+      "race": "Undead",
+      "power": "3",
+      "count": 100,
+      "start_time": "1:30",
+      "end_time": "2:00"
+    },
+    {
+      "id": "",
+      "race": "Orc",
+      "power": "3",
+      "count": 100,
+      "start_time": "1:45",
+      "end_time": "2:15"
+    },
+    {
+      "id": "",
+      "race": "Demon",
+      "power": "3",
+      "count": 100,
+      "start_time": "2:00",
+      "end_time": "2:30"
+    },
+    {
+      "id": "",
+      "race": "Undead",
+      "power": "4",
+      "count": 100,
+      "start_time": "2:15",
+      "end_time": "2:45"
+    },
+    {
+      "id": "",
+      "race": "Orc",
+      "power": "4",
+      "count": 100,
+      "start_time": "2:30",
+      "end_time": "3:00"
+    },
+    {
+      "id": "",
+      "race": "Demon",
+      "power": "4",
+      "count": 100,
+      "start_time": "2:45",
+      "end_time": "3:15"
+    },
+    {
+      "id": "",
+      "race": "Undead",
+      "power": "5",
+      "count": 30,
+      "start_time": "3:00",
+      "end_time": "3:30"
+    },
+    {
+      "id": "",
+      "race": "Orc",
+      "power": "5",
+      "count": 30,
+      "start_time": "3:15",
+      "end_time": "3:45"
+    },
+    {
+      "id": "",
+      "race": "Demon",
+      "power": "1",
+      "count": 40,
+      "start_time": "3:30",
+      "end_time": "4:00"
+    },
+    {
+      "id": "",
+      "race": "Demon",
+      "power": "2",
+      "count": 40,
+      "start_time": "3:30",
+      "end_time": "4:00"
+    },
+    {
+      "id": "",
+      "race": "Demon",
+      "power": "3",
+      "count": 40,
+      "start_time": "3:30",
+      "end_time": "4:00"
+    },
+    {
+      "id": "",
+      "race": "Demon",
+      "power": "4",
+      "count": 40,
+      "start_time": "3:30",
+      "end_time": "4:00"
+    },
+    {
+      "id": "",
+      "race": "Demon",
+      "power": "5",
+      "count": 30,
+      "start_time": "3:30",
+      "end_time": "4:00"
+    }
+  ]
+}

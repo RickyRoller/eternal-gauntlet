@@ -1,0 +1,32 @@
+[package]
+name = "eternal-gauntlet"
+version = "1.0.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.86"
+bevy = "0.13.1"
+bevy_common_assets = { version = "0.10.0", features = ["json"] }
+image = "0.24.7"
+kd-tree = "0.5.3"
+log = "0.4.22"
+rand = "0.8.5"
+serde = "1.0.203"
+serde_json = "1.0.120"
+typenum = "1.17.0"
+uuid = "1.9.1"
+wasm-logger = "0.2.0"
+
+[workspace]
+resolver = "2"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+opt-level = 'z'
