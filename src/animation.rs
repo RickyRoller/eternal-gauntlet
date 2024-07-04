@@ -1,8 +1,7 @@
-use bevy::{animation, prelude::*};
+use bevy::prelude::*;
 
 use crate::{
     enemy::Enemy,
-    gun::Gun,
     lightning_hit_bundle::LightningHit,
     player::{Player, PlayerState},
     state::GameState,
@@ -30,7 +29,6 @@ impl Plugin for AnimationPlugin {
                 animate_player,
                 animate_enemy,
                 animate_hit,
-                flip_gun_sprite_y,
                 flip_wand_sprite_y,
                 flip_player_sprite_x,
                 flip_enemy_sprite_x,
@@ -143,24 +141,6 @@ fn flip_enemy_sprite_x(
             sprite.flip_x = false;
         } else {
             sprite.flip_x = true;
-        }
-    }
-}
-
-fn flip_gun_sprite_y(
-    cursor_position: Res<CursorPosition>,
-    mut gun_query: Query<(&mut Sprite, &Transform), With<Gun>>,
-) {
-    if gun_query.is_empty() {
-        return;
-    }
-
-    let (mut sprite, transform) = gun_query.single_mut();
-    if let Some(cursor_position) = cursor_position.0 {
-        if cursor_position.x > transform.translation.x {
-            sprite.flip_y = false;
-        } else {
-            sprite.flip_y = true;
         }
     }
 }

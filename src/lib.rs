@@ -9,7 +9,6 @@ pub mod enemy_bundle;
 pub mod enemy_textures;
 pub mod generate_texture_atlas;
 pub mod gui;
-pub mod gun;
 pub mod hit_textures;
 pub mod lightning_hit_bundle;
 pub mod player;

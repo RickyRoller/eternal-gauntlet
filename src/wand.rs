@@ -4,7 +4,6 @@ use bevy::math::{vec2, vec3};
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::time::Stopwatch;
-// use bevy_prototype_lyon::prelude::*;
 
 use crate::audio::{LightningEffectHandle, LightningSoundEffect};
 use crate::enemy::Enemy;
@@ -52,10 +51,7 @@ impl Plugin for WandPlugin {
                 Update,
                 (
                     update_wand_transform,
-                    // update_bullets,
                     handle_wand_input,
-                    // despawn_old_bullets,
-                    // draw_debug_cone,
                     apply_damage,
                     secondary_arc,
                     despawn_lightning,
@@ -144,17 +140,6 @@ fn apply_damage(
     }
 }
 
-// fn despawn_old_bullets(
-//     mut commands: Commands,
-//     bullet_query: Query<(&SpawnInstant, Entity), With<Bullet>>,
-// ) {
-//     for (instant, e) in bullet_query.iter() {
-//         if instant.0.elapsed().as_secs_f32() > BULLET_TIME_SECS {
-//             commands.entity(e).despawn();
-//         }
-//     }
-// }
-
 fn despawn_lightning(
     mut commands: Commands,
     mut lightning_query: Query<(&mut LightningEffect, Entity), With<Lightning>>,
@@ -209,7 +194,7 @@ fn handle_wand_input(
     cursor_pos: Res<CursorPosition>,
     mut damage_events: EventWriter<DamageEvent>,
 ) {
-    if wand_query.is_empty() || player_query.is_empty() {
+    if wand_query.is_empty() || player_query.is_empty() || cursor_pos.0.is_none() {
         return;
     }
 
@@ -251,17 +236,6 @@ fn handle_wand_input(
         }
     }
 }
-
-// fn update_bullets(mut bullet_query: Query<(&mut Transform, &BulletDirection), With<Lightning>>) {
-//     if bullet_query.is_empty() {
-//         return;
-//     }
-
-//     for (mut t, dir) in bullet_query.iter_mut() {
-//         t.translation += dir.0.normalize() * Vec3::splat(BULLET_SPEED);
-//         t.translation.z = 10.0;
-//     }
-// }
 
 fn get_enemies_in_cone(
     player_transform: &Transform,
@@ -347,44 +321,3 @@ fn draw_vector_path(
         .insert(LightningEffect { lifetime: 1.4 })
         .insert(Lightning);
 }
-
-// fn draw_debug_cone(
-//     mut commands: Commands,
-//     player_query: Query<&Transform, With<Player>>,
-//     cursor_pos: Res<CursorPosition>,
-// ) {
-//     if let Ok(player_transform) = player_query.get_single() {
-//         let player_pos = player_transform.translation.truncate();
-//         let cursor_pos = cursor_pos.0.unwrap_or(player_pos);
-//         let to_cursor = (cursor_pos - player_pos).normalize();
-//         let angle = 90.0_f32.to_radians();
-//         let radius = 300.0;
-
-//         let points = (0..=20)
-//             .map(|i| {
-//                 let t = i as f32 / 20.0;
-//                 let current_angle = angle * (t - 0.5);
-//                 let rotation = Mat2::from_angle(current_angle);
-//                 player_pos + rotation.mul_vec2(to_cursor) * radius
-//             })
-//             .collect::<Vec<Vec2>>();
-
-//         let shape = shapes::Polygon {
-//             points: points.clone(),
-//             closed: true,
-//         };
-
-//         // commands.spawn(GeometryBuilder::new().add(&shape).build(
-//         //     DrawMode::Fill(FillMode::color(Color::rgba(1.0, 1.0, 0.0, 0.2))),
-//         //     Transform::from_translation(player_transform.translation + Vec3::new(0.0, 0.0, 5.0)),
-//         // ));
-
-//         commands.spawn((
-//             ShapeBundle {
-//                 path: GeometryBuilder::build_as(&shape),
-//                 ..default()
-//             },
-//             Fill::color(Color::CYAN),
-//         ));
-//     }
-// }

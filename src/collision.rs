@@ -5,7 +5,7 @@ use kd_tree::{KdPoint, KdTree};
 
 use crate::player::{Player, PlayerEnemyCollisionEvent};
 use crate::*;
-use crate::{enemy::Enemy, gun::Bullet, state::GameState};
+use crate::{enemy::Enemy, state::GameState};
 
 pub struct CollisionPlugin;
 
@@ -22,7 +22,6 @@ impl Plugin for CollisionPlugin {
         app.insert_resource(EnemyKdTree::default()).add_systems(
             Update,
             (
-                handle_enemy_bullet_collision,
                 handle_enemy_player_collision,
                 update_enemy_kd_tree
                     .run_if(on_timer(Duration::from_secs_f32(KD_TREE_REFRESH_RATE))),
@@ -61,27 +60,6 @@ fn update_enemy_kd_tree(
     }
 
     tree.0 = KdTree::build_by_ordered_float(items);
-}
-
-fn handle_enemy_bullet_collision(
-    bullet_query: Query<&Transform, With<Bullet>>,
-    tree: Res<EnemyKdTree>,
-    mut enemy_query: Query<(&Transform, &mut Enemy), With<Enemy>>,
-) {
-    if bullet_query.is_empty() || enemy_query.is_empty() {
-        return;
-    }
-
-    for b_t in bullet_query.iter() {
-        let pos = b_t.translation;
-        let enemies = tree.0.within_radius(&[pos.x, pos.y], 50.0);
-
-        for e in enemies {
-            if let Ok((_, mut enemy)) = enemy_query.get_mut(e.entity) {
-                enemy.current_health -= BULLET_DAMAGE;
-            }
-        }
-    }
 }
 
 impl KdPoint for Collidable {

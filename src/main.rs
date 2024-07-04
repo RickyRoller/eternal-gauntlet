@@ -13,7 +13,6 @@ use eternal_gauntlet::generate_texture_atlas::{
     GenerateTextureAtlasPlugin, SerializableTextureAtlasLayout,
 };
 use eternal_gauntlet::gui::GuiPlugin;
-use eternal_gauntlet::gun::GunPlugin;
 use eternal_gauntlet::hit_textures::HitTexturesPlugin;
 use eternal_gauntlet::player::PlayerPlugin;
 use eternal_gauntlet::state::GameState;
@@ -30,7 +29,6 @@ fn main() {
                 .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        // mode: bevy::window::WindowMode::Fullscreen,
                         resizable: true,
                         focused: true,
                         resolution: (WW, WH).into(),
@@ -60,7 +58,6 @@ fn main() {
         .add_plugins(AssetLoadingPlugin)
         // .add_plugins(GenerateTextureAtlasPlugin)
         .add_plugins(GuiPlugin)
-        .add_plugins(GunPlugin)
         .add_plugins(HitTexturesPlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(ResourcesPlugin)
