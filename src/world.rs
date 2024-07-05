@@ -19,7 +19,7 @@ pub struct SelectedCharacter(pub Option<String>);
 
 impl Default for SelectedCharacter {
     fn default() -> Self {
-        SelectedCharacter(Some("doc".to_string()))
+        SelectedCharacter(Some("wizzard-m".to_string()))
     }
 }
 
