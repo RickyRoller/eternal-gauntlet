@@ -12,6 +12,7 @@ use crate::lightning_hit_bundle::{LightningHit, LightningHitBundle};
 use crate::player::Player;
 use crate::state::GameState;
 use crate::*;
+use bevy::audio::Volume;
 
 use self::animation::AnimationIndices;
 use self::player::Level;
@@ -132,6 +133,10 @@ fn apply_damage(
             commands.spawn((
                 AudioBundle {
                     source: lightning_sound.handle.clone(),
+                    settings: PlaybackSettings {
+                        volume: Volume::new(0.8),
+                        ..default()
+                    },
                     ..default()
                 },
                 LightningSoundEffect,

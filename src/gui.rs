@@ -1,11 +1,10 @@
-use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 
-use crate::enemy::Enemy;
-use crate::player::{Experience, Health, Level, Player};
+use crate::player::{Health, Level, Player};
 use crate::resources::Score;
 use crate::state::GameState;
 use crate::world::GameEntity;
+use crate::PLAYER_HEALTH;
 
 pub struct GuiPlugin;
 
@@ -17,10 +16,18 @@ struct MainMenuItem;
 #[derive(Component)]
 struct ScoreText;
 
+#[derive(Component)]
+struct HealthBar;
+
+#[derive(Component)]
+struct HealthHeart;
+
+#[derive(Component)]
+struct LevelText;
+
 impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(FrameTimeDiagnosticsPlugin)
-            .add_systems(OnEnter(GameState::MainMenu), setup_main_menu)
+        app.add_systems(OnEnter(GameState::MainMenu), setup_main_menu)
             .add_systems(OnExit(GameState::MainMenu), despawn_main_menu)
             .add_systems(
                 Update,
@@ -30,6 +37,15 @@ impl Plugin for GuiPlugin {
             .add_systems(
                 Update,
                 update_score_text.run_if(in_state(GameState::InGame)),
+            )
+            .add_systems(OnEnter(GameState::GameInit), spawn_health_bar)
+            .add_systems(
+                Update,
+                update_health_bar.run_if(in_state(GameState::InGame)),
+            )
+            .add_systems(
+                Update,
+                update_experience_bar.run_if(in_state(GameState::InGame)),
             );
     }
 }
@@ -42,6 +58,7 @@ fn spawn_debug_text(mut commands: Commands, asset_server: Res<AssetServer>) {
                 style: Style {
                     width: Val::Percent(100.0),
                     height: Val::Percent(100.0),
+                    padding: UiRect::px(0.0, 20.0, 20.0, 0.0),
                     align_items: AlignItems::Start,
                     justify_content: JustifyContent::End,
                     ..default()
@@ -121,48 +138,49 @@ fn update_score_text(mut query: Query<&mut Text, With<ScoreText>>, score: Res<Sc
     text.sections[0].value = format!("Score: {}", score.0);
 }
 
-fn update_debug_text(
-    mut query: Query<&mut Text, With<DebugText>>,
-    diagnostics: Res<DiagnosticsStore>,
-    enemy_query: Query<(), With<Enemy>>,
-    player_query: Query<&Health, With<Player>>,
-    experience_query: Query<&Experience, With<Player>>,
-    level_query: Query<&Level, With<Player>>,
-) {
-    if query.is_empty()
-        || player_query.is_empty()
-        || experience_query.is_empty()
-        || level_query.is_empty()
-    {
-        return;
-    }
-
-    let num_enemies = enemy_query.iter().count();
-    let player_health = player_query.single().0;
-    let experience = experience_query.single().0;
-    let level = level_query.single().0;
-    let mut text = query.single_mut();
-    if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
-        if let Some(value) = fps.smoothed() {
-            text.sections[0].value =
-                format!("Fps: {value:.2}\nEnemies: {num_enemies}\nHealth: {player_health}\nExperience: {experience:.2}\nLevel: {level}");
-        }
-    }
-}
-
-fn setup_main_menu(mut commands: Commands) {
+fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        })
+            MainMenuItem,
+        ))
         .with_children(|parent| {
+            // Splash image
+            parent.spawn(ImageBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(0.0),
+                    left: Val::Px(0.0),
+                    width: Val::Px(1300.0),
+                    ..default()
+                },
+                image: UiImage::new(asset_server.load("splash.png")),
+                ..default()
+            });
+
+            // Title image
+            parent.spawn(ImageBundle {
+                style: Style {
+                    margin: UiRect::px(0.0, 0.0, 120.0, 0.0),
+                    width: Val::Px(800.0), // Adjust size as needed
+                    height: Val::Px(119.0),
+                    ..default()
+                },
+                image: UiImage::new(asset_server.load("eternal-gauntlet.png")),
+                ..default()
+            });
+
+            // Play button
             parent
                 .spawn(ButtonBundle {
                     style: Style {
@@ -171,6 +189,7 @@ fn setup_main_menu(mut commands: Commands) {
                         border: UiRect::all(Val::Px(5.0)),
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
+                        margin: UiRect::px(0.0, 0.0, 20.0, 0.0),
                         ..default()
                     },
                     border_color: BorderColor(Color::BLACK),
@@ -186,8 +205,7 @@ fn setup_main_menu(mut commands: Commands) {
                         },
                     ));
                 });
-        })
-        .insert(MainMenuItem);
+        });
 }
 
 fn handle_main_menu_buttons(
@@ -207,5 +225,123 @@ fn handle_main_menu_buttons(
 fn despawn_main_menu(mut commands: Commands, menu_items_query: Query<Entity, With<MainMenuItem>>) {
     for e in menu_items_query.iter() {
         commands.entity(e).despawn_recursive();
+    }
+}
+
+fn spawn_health_bar(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    position_type: PositionType::Absolute,
+                    align_items: AlignItems::Start,
+                    justify_content: JustifyContent::Start,
+                    flex_direction: FlexDirection::Column,
+                    padding: UiRect::px(20.0, 0.0, 20.0, 0.0),
+                    ..default()
+                },
+                ..default()
+            },
+            GameEntity,
+        ))
+        .with_children(|parent| {
+            // Health hearts
+            parent
+                .spawn((
+                    NodeBundle {
+                        style: Style {
+                            flex_direction: FlexDirection::Row,
+                            ..default()
+                        },
+                        ..default()
+                    },
+                    HealthBar,
+                ))
+                .with_children(|parent| {
+                    for _ in 0..5 {
+                        parent.spawn((
+                            ImageBundle {
+                                style: Style {
+                                    width: Val::Px(32.0),
+                                    height: Val::Px(32.0),
+                                    margin: UiRect::px(0.0, 5.0, 0.0, 0.0),
+                                    ..default()
+                                },
+                                image: UiImage::new(asset_server.load("heart_full.png")),
+                                ..default()
+                            },
+                            HealthHeart,
+                        ));
+                    }
+                });
+
+            // Experience bar and level
+            parent
+                .spawn(NodeBundle {
+                    style: Style {
+                        width: Val::Percent(100.0),
+                        height: Val::Px(20.0),
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        margin: UiRect::px(0.0, 0.0, 10.0, 0.0),
+                        ..default()
+                    },
+                    ..default()
+                })
+                .with_children(|parent| {
+                    // Level text
+                    parent.spawn((
+                        TextBundle::from_section(
+                            "Lvl 1",
+                            TextStyle {
+                                font: asset_server.load("monogram.ttf"),
+                                font_size: 24.0,
+                                color: Color::WHITE,
+                            },
+                        )
+                        .with_style(Style {
+                            margin: UiRect::px(10.0, 0.0, 0.0, 0.0),
+                            ..default()
+                        }),
+                        LevelText,
+                    ));
+                });
+        });
+}
+
+fn update_health_bar(
+    player_query: Query<&Health, With<Player>>,
+    mut heart_query: Query<&mut UiImage, With<HealthHeart>>,
+    asset_server: Res<AssetServer>,
+) {
+    if let Ok(player_health) = player_query.get_single() {
+        let full_heart = asset_server.load("ui_heart_full.png");
+        let empty_heart = asset_server.load("ui_heart_empty.png");
+
+        let total_hearts = heart_query.iter().count();
+        let health_percentage = player_health.0 as f32 / PLAYER_HEALTH as f32;
+
+        for (index, mut heart_image) in heart_query.iter_mut().enumerate() {
+            let heart_threshold = (index + 1) as f32 / total_hearts as f32;
+            if health_percentage >= heart_threshold {
+                heart_image.texture = full_heart.clone();
+            } else {
+                heart_image.texture = empty_heart.clone();
+            }
+        }
+    }
+}
+
+fn update_experience_bar(
+    mut level_text_query: Query<&mut Text, With<LevelText>>,
+    player_query: Query<&Level, With<Player>>,
+) {
+    if let Ok(level) = player_query.get_single() {
+        // Update level text
+        if let Ok(mut text) = level_text_query.get_single_mut() {
+            text.sections[0].value = format!("Lvl {}", level.0);
+        }
     }
 }

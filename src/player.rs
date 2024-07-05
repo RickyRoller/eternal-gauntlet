@@ -5,6 +5,9 @@ use crate::state::GameState;
 use crate::utils::{ease_in_out_quint, scale_value};
 use crate::*;
 
+use self::audio::{LevelUpEffectHandle, LevelUpSoundEffect};
+use bevy::audio::Volume;
+
 pub struct PlayerPlugin;
 
 #[derive(Component)]
@@ -42,8 +45,10 @@ impl Plugin for PlayerPlugin {
 }
 
 fn handle_player_level_up(
+    mut commands: Commands,
     mut experience_query: Query<&mut Experience, With<Player>>,
     mut level_query: Query<&mut Level, With<Player>>,
+    level_up_sound: Res<LevelUpEffectHandle>,
 ) {
     if experience_query.is_empty() || level_query.is_empty() {
         return;
@@ -54,6 +59,18 @@ fn handle_player_level_up(
     if experience.0 >= experience_per_level {
         experience.0 -= experience_per_level;
         level.0 += 1;
+
+        commands.spawn((
+            AudioBundle {
+                source: level_up_sound.handle.clone(),
+                settings: PlaybackSettings {
+                    volume: Volume::new(0.3),
+                    ..default()
+                },
+                ..default()
+            },
+            LevelUpSoundEffect,
+        ));
     }
 }
 
