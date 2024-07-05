@@ -18,6 +18,9 @@ serde_json = "1.0.120"
 typenum = "1.17.0"
 uuid = "1.9.1"
 wasm-logger = "0.2.0"
+web-sys = { version = "0.3", features = ["Window", "MessageEvent"] }
+wasm-bindgen = "0.2"
+lazy_static = "1.4.0"
 
 [workspace]
 resolver = "2"

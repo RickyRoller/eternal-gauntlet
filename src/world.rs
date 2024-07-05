@@ -4,16 +4,24 @@ use bevy::time::Stopwatch;
 use rand::Rng;
 
 use crate::animation::AnimationTimer;
-// use crate::gun::{Gun, GunTimer};
 use crate::player::{Experience, Health, Level, Player, PlayerState};
 use crate::wand::{Wand, WandTimer};
 use crate::*;
-use crate::{state::GameState, GlobalTextureAtlas};
+use crate::{state::GameState, GlobalTextureAtlas, HeroTextureAtlases};
 
 pub struct WorldPlugin;
 
 #[derive(Component)]
 pub struct GameEntity;
+
+#[derive(Resource)]
+pub struct SelectedCharacter(pub Option<String>);
+
+impl Default for SelectedCharacter {
+    fn default() -> Self {
+        SelectedCharacter(Some("doc".to_string()))
+    }
+}
 
 impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
@@ -28,44 +36,48 @@ impl Plugin for WorldPlugin {
 fn init_world(
     mut commands: Commands,
     handle: Res<GlobalTextureAtlas>,
+    selected_character: Res<SelectedCharacter>,
+    hero_atlases: Res<HeroTextureAtlases>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    commands.spawn((
-        SpriteSheetBundle {
-            texture: handle.image.clone().unwrap(),
-            atlas: TextureAtlas {
-                layout: handle.layout.clone().unwrap(),
-                index: 0,
-            },
-            transform: Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
-            ..default()
-        },
-        Player,
-        Health(PLAYER_HEALTH),
-        Experience(0.0),
-        Level(1),
-        PlayerState::default(),
-        AnimationTimer(Timer::from_seconds(0.15, TimerMode::Repeating)),
-        GameEntity,
-    ));
-    commands.spawn((
-        SpriteSheetBundle {
-            texture: handle.image.clone().unwrap(),
-            atlas: TextureAtlas {
-                layout: handle.layout.clone().unwrap(),
-                index: 17,
-            },
-            transform: Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
-            ..default()
-        },
-        // Gun,
-        // GunTimer(Stopwatch::new()),
-        Wand,
-        WandTimer(Stopwatch::new()),
-        GameEntity,
-    ));
+    let hero_texture_atlas = hero_atlases.get_hero(selected_character.0.as_ref().unwrap());
 
-    next_state.set(GameState::InGame);
+    if let Some(hero_texture_atlas) = hero_texture_atlas {
+        commands.spawn((
+            SpriteSheetBundle {
+                texture: hero_texture_atlas.image.clone().unwrap(),
+                atlas: TextureAtlas {
+                    layout: hero_texture_atlas.layout.clone().unwrap(),
+                    index: 0,
+                },
+                transform: Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+                ..default()
+            },
+            Player,
+            Health(PLAYER_HEALTH),
+            Experience(0.0),
+            Level(1),
+            PlayerState::default(),
+            AnimationTimer(Timer::from_seconds(0.15, TimerMode::Repeating)),
+            GameEntity,
+        ));
+        commands.spawn((
+            SpriteSheetBundle {
+                texture: handle.image.clone().unwrap(),
+                atlas: TextureAtlas {
+                    layout: handle.layout.clone().unwrap(),
+                    index: 17,
+                },
+                transform: Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+                ..default()
+            },
+            Wand,
+            WandTimer(Stopwatch::new()),
+            GameEntity,
+        ));
+
+        next_state.set(GameState::InGame);
+    }
 }
 
 fn spawn_world_decorations(mut commands: Commands, handle: Res<GlobalTextureAtlas>) {

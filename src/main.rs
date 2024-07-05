@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
+use std::sync::Mutex;
+use wasm_bindgen::prelude::*;
 
+use crate::resources::HeroTextureAtlases;
+use bevy::sprite::TextureAtlas;
 use bevy_common_assets::json::JsonAssetPlugin;
 use eternal_gauntlet::animation::AnimationPlugin;
 use eternal_gauntlet::asset_loading::AssetLoadingPlugin;
@@ -14,11 +18,11 @@ use eternal_gauntlet::generate_texture_atlas::{
 };
 use eternal_gauntlet::gui::GuiPlugin;
 use eternal_gauntlet::hit_textures::HitTexturesPlugin;
-use eternal_gauntlet::player::PlayerPlugin;
+use eternal_gauntlet::player::{Player, PlayerPlugin};
 use eternal_gauntlet::state::GameState;
 use eternal_gauntlet::upgrade_menu::UpgradeMenu;
 use eternal_gauntlet::wand::WandPlugin;
-use eternal_gauntlet::world::WorldPlugin;
+use eternal_gauntlet::world::{SelectedCharacter, WorldPlugin};
 use eternal_gauntlet::*;
 
 fn main() {
@@ -29,9 +33,9 @@ fn main() {
                 .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        resizable: true,
-                        focused: true,
-                        resolution: (WW, WH).into(),
+                        // resizable: true,
+                        // focused: true,
+                        // resolution: (WW, WH).into(),
                         canvas: Some("#game-canvas".into()),
                         ..default()
                     }),
@@ -66,5 +70,34 @@ fn main() {
         .add_plugins(WorldPlugin)
         .insert_resource(Msaa::Off)
         .add_systems(Update, close_on_esc)
+        .init_resource::<SelectedCharacter>()
+        .add_systems(Update, process_js_messages)
         .run();
+}
+
+static JS_MESSAGE: Mutex<Option<String>> = Mutex::new(None);
+
+#[wasm_bindgen]
+pub fn send_message_to_bevy(message: String) {
+    *JS_MESSAGE.lock().unwrap() = Some(message);
+}
+
+fn process_js_messages(
+    mut selected_character: ResMut<SelectedCharacter>,
+    hero_atlases: Res<HeroTextureAtlases>,
+    mut player_query: Query<(&mut TextureAtlas, &mut Handle<Image>), With<Player>>,
+) {
+    if let Some(message) = JS_MESSAGE.lock().unwrap().take() {
+        let message_clone = message.clone();
+        selected_character.0 = Some(message);
+
+        if let Some(hero_atlas) = hero_atlases.get_hero(&message_clone) {
+            if let Ok((mut texture_atlas, mut image_handle)) = player_query.get_single_mut() {
+                if let (Some(layout), Some(image)) = (hero_atlas.layout, hero_atlas.image) {
+                    texture_atlas.layout = layout;
+                    *image_handle = image;
+                }
+            }
+        }
+    }
 }

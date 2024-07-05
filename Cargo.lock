@@ -1661,13 +1661,16 @@ dependencies = [
  "bevy_common_assets",
  "image",
  "kd-tree",
+ "lazy_static",
  "log",
  "rand",
  "serde",
  "serde_json",
  "typenum",
  "uuid",
+ "wasm-bindgen",
  "wasm-logger",
+ "web-sys",
 ]
 
 [[package]]
