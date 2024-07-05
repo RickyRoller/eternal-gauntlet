@@ -2,6 +2,9 @@
 This is my submission for the [Solana Speedrun 3 Game Jam](https://solanaspeedrun.com/).
 Built with Bevy + Rust + WASM + Gameshift + Solana.
 
+Frontend hosted at [https://eternal-gauntlet-frontend.vercel.app/](https://eternal-gauntlet-frontend.vercel.app/)
+Frontend Repo [https://github.com/RickyRoller/eternal-gauntlet-frontend](https://github.com/RickyRoller/eternal-gauntlet-frontend)
+
 ## Controls
 - `WASD` for movement
 - Left click to cast spell
