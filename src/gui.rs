@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::audio::BackgroundMusic;
 use crate::player::{Health, Level, Player};
 use crate::resources::Score;
 use crate::state::GameState;
@@ -25,10 +26,17 @@ struct HealthHeart;
 #[derive(Component)]
 struct LevelText;
 
+#[derive(Resource)]
+struct HeartAssets {
+    full: Handle<Image>,
+    empty: Handle<Image>,
+}
+
 impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::MainMenu), setup_main_menu)
             .add_systems(OnExit(GameState::MainMenu), despawn_main_menu)
+            .add_systems(OnEnter(GameState::GameInit), load_heart_assets)
             .add_systems(
                 Update,
                 handle_main_menu_buttons.run_if(in_state(GameState::MainMenu)),
@@ -48,6 +56,14 @@ impl Plugin for GuiPlugin {
                 update_experience_bar.run_if(in_state(GameState::InGame)),
             );
     }
+}
+
+fn load_heart_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let heart_assets = HeartAssets {
+        full: asset_server.load("ui_heart_full.png"),
+        empty: asset_server.load("ui_heart_empty.png"),
+    };
+    commands.insert_resource(heart_assets);
 }
 
 fn spawn_debug_text(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -211,10 +227,14 @@ fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn handle_main_menu_buttons(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>)>,
     mut next_state: ResMut<NextState<GameState>>,
+    mut background_music: Query<&mut AudioSink, With<BackgroundMusic>>,
 ) {
     for interaction in interaction_query.iter() {
         match interaction {
             Interaction::Pressed => {
+                if let Ok(mut sink) = background_music.get_single_mut() {
+                    sink.play();
+                }
                 next_state.set(GameState::GameInit);
             }
             _ => {}
@@ -269,7 +289,7 @@ fn spawn_health_bar(mut commands: Commands, asset_server: Res<AssetServer>) {
                                     margin: UiRect::px(0.0, 5.0, 0.0, 0.0),
                                     ..default()
                                 },
-                                image: UiImage::new(asset_server.load("heart_full.png")),
+                                image: UiImage::new(asset_server.load("ui_heart_full.png")),
                                 ..default()
                             },
                             HealthHeart,
@@ -314,21 +334,18 @@ fn spawn_health_bar(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn update_health_bar(
     player_query: Query<&Health, With<Player>>,
     mut heart_query: Query<&mut UiImage, With<HealthHeart>>,
-    asset_server: Res<AssetServer>,
+    heart_assets: Res<HeartAssets>,
 ) {
     if let Ok(player_health) = player_query.get_single() {
-        let full_heart = asset_server.load("ui_heart_full.png");
-        let empty_heart = asset_server.load("ui_heart_empty.png");
-
         let total_hearts = heart_query.iter().count();
         let health_percentage = player_health.0 as f32 / PLAYER_HEALTH as f32;
 
         for (index, mut heart_image) in heart_query.iter_mut().enumerate() {
             let heart_threshold = (index + 1) as f32 / total_hearts as f32;
             if health_percentage >= heart_threshold {
-                heart_image.texture = full_heart.clone();
+                heart_image.texture = heart_assets.full.clone();
             } else {
-                heart_image.texture = empty_heart.clone();
+                heart_image.texture = heart_assets.empty.clone();
             }
         }
     }

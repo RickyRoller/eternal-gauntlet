@@ -1,3 +1,4 @@
+use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
 use log::info;
@@ -27,6 +28,7 @@ use eternal_gauntlet::*;
 fn main() {
     App::new()
         .init_state::<GameState>()
+        .insert_resource(AssetMetaCheck::Never)
         .add_plugins(
             DefaultPlugins
                 .set(ImagePlugin::default_nearest())

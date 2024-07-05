@@ -1,6 +1,8 @@
 use bevy::audio::{AudioSource, PlaybackMode, Volume};
 use bevy::prelude::*;
 
+use crate::state::GameState;
+
 pub struct AudioPlugin;
 
 #[derive(Component)]
@@ -24,7 +26,7 @@ pub struct LevelUpSoundEffect;
 
 impl Plugin for AudioPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup)
+        app.add_systems(OnEnter(GameState::Loading), setup)
             .add_systems(Update, (clean_up_lightning, clean_up_level_up));
     }
 }
@@ -34,6 +36,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         AudioBundle {
             source: asset_server.load("audio/eternal_labyrinth_ext.ogg"),
             settings: PlaybackSettings {
+                paused: true,
                 mode: PlaybackMode::Loop,
                 volume: Volume::new(0.8),
                 ..default()
