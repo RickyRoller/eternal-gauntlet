@@ -2,67 +2,82 @@
   "undead": {
     "1": {
       "health": 8,
-      "damage": 1
+      "damage": 1,
+      "power": 1
     },
     "2": {
       "health": 12,
-      "damage": 1
+      "damage": 1,
+      "power": 2
     },
     "3": {
       "health": 16,
-      "damage": 1
+      "damage": 1,
+      "power": 3
     },
     "4": {
       "health": 20,
-      "damage": 1
+        "damage": 1,
+      "power": 4
     },
     "5": {
       "health": 36,
-      "damage": 5
+      "damage": 5,
+      "power": 5
     }
   },
   "orc": {
     "1": {
       "health": 8,
-      "damage": 1
+      "damage": 1,
+      "power": 1
     },
     "2": {
       "health": 12,
-      "damage": 1
+      "damage": 1,
+      "power": 2
     },
     "3": {
       "health": 16,
-      "damage": 1
+      "damage": 1,
+      "power": 3
     },
     "4": {
       "health": 20,
-      "damage": 1
+        "damage": 1,
+      "power": 4
     },
     "5": {
       "health": 36,
-      "damage": 5
+      "damage": 5,
+      "power": 5
     }
   },
   "demon": {
     "1": {
       "health": 8,
-      "damage": 1
+      "damage": 1,
+      "power": 1
     },
     "2": {
       "health": 12,
-      "damage": 1
+      "damage": 1,
+      "power": 2
     },
     "3": {
       "health": 16,
-      "damage": 1
+      "damage": 1,
+      "power": 3
     },
     "4": {
       "health": 20,
-      "damage": 1
+        "damage": 1,
+      "power": 4
     },
     "5": {
       "health": 36,
-      "damage": 5
+      "damage": 5,
+      "power": 5
     }
   }
 }

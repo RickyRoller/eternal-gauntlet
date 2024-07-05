@@ -40,7 +40,8 @@ fn init_world(
     hero_atlases: Res<HeroTextureAtlases>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    let hero_texture_atlas = hero_atlases.get_hero(selected_character.0.as_ref().unwrap());
+    let hero = selected_character.0.as_ref().unwrap();
+    let hero_texture_atlas = hero_atlases.get_hero(hero);
 
     if let Some(hero_texture_atlas) = hero_texture_atlas {
         commands.spawn((

@@ -174,8 +174,8 @@ fn update_wand_transform(
 
     let offset = 20.0;
     let new_wand_pos = vec2(
-        player_pos.x + offset * angle.cos() - 5.0,
-        player_pos.y + offset * angle.sin() - 10.0,
+        player_pos.x + offset * angle.cos(),
+        player_pos.y + offset * angle.sin() - 25.0,
     );
 
     wand_transform.translation = vec3(new_wand_pos.x, new_wand_pos.y, wand_transform.translation.z);

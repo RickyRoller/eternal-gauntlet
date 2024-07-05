@@ -1,10 +1,9 @@
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
+use log::info;
 use std::sync::Mutex;
 use wasm_bindgen::prelude::*;
 
-use crate::resources::HeroTextureAtlases;
-use bevy::sprite::TextureAtlas;
 use bevy_common_assets::json::JsonAssetPlugin;
 use eternal_gauntlet::animation::AnimationPlugin;
 use eternal_gauntlet::asset_loading::AssetLoadingPlugin;
@@ -18,7 +17,7 @@ use eternal_gauntlet::generate_texture_atlas::{
 };
 use eternal_gauntlet::gui::GuiPlugin;
 use eternal_gauntlet::hit_textures::HitTexturesPlugin;
-use eternal_gauntlet::player::{Player, PlayerPlugin};
+use eternal_gauntlet::player::PlayerPlugin;
 use eternal_gauntlet::state::GameState;
 use eternal_gauntlet::upgrade_menu::UpgradeMenu;
 use eternal_gauntlet::wand::WandPlugin;
@@ -72,6 +71,7 @@ fn main() {
         .add_systems(Update, close_on_esc)
         .init_resource::<SelectedCharacter>()
         .add_systems(Update, process_js_messages)
+        .add_systems(OnEnter(GameState::MainMenu), on_game_end)
         .run();
 }
 
@@ -82,22 +82,22 @@ pub fn send_message_to_bevy(message: String) {
     *JS_MESSAGE.lock().unwrap() = Some(message);
 }
 
-fn process_js_messages(
-    mut selected_character: ResMut<SelectedCharacter>,
-    hero_atlases: Res<HeroTextureAtlases>,
-    mut player_query: Query<(&mut TextureAtlas, &mut Handle<Image>), With<Player>>,
-) {
+fn process_js_messages(mut selected_character: ResMut<SelectedCharacter>) {
     if let Some(message) = JS_MESSAGE.lock().unwrap().take() {
-        let message_clone = message.clone();
+        info!("Message: {}", message.clone());
         selected_character.0 = Some(message);
-
-        if let Some(hero_atlas) = hero_atlases.get_hero(&message_clone) {
-            if let Ok((mut texture_atlas, mut image_handle)) = player_query.get_single_mut() {
-                if let (Some(layout), Some(image)) = (hero_atlas.layout, hero_atlas.image) {
-                    texture_atlas.layout = layout;
-                    *image_handle = image;
-                }
-            }
-        }
     }
+}
+
+fn on_game_end(mut score: ResMut<Score>) {
+    info!("Score: {}", score.0);
+    if score.0 > 0 {
+        send_to_js(score.0);
+        score.0 = 0;
+    }
+}
+
+#[wasm_bindgen(module = "/js-link.js")]
+extern "C" {
+    fn send_to_js(score: u32);
 }

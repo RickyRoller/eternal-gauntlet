@@ -3,6 +3,7 @@ use bevy::prelude::*;
 
 use crate::enemy::Enemy;
 use crate::player::{Experience, Health, Level, Player};
+use crate::resources::Score;
 use crate::state::GameState;
 use crate::world::GameEntity;
 
@@ -12,6 +13,9 @@ pub struct GuiPlugin;
 struct DebugText;
 #[derive(Component)]
 struct MainMenuItem;
+
+#[derive(Component)]
+struct ScoreText;
 
 impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
@@ -25,12 +29,42 @@ impl Plugin for GuiPlugin {
             .add_systems(OnEnter(GameState::GameInit), spawn_debug_text)
             .add_systems(
                 Update,
-                update_debug_text.run_if(in_state(GameState::InGame)),
+                update_score_text.run_if(in_state(GameState::InGame)),
             );
     }
 }
 
 fn spawn_debug_text(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // TODO: Add a score text
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Start,
+                    justify_content: JustifyContent::End,
+                    ..default()
+                },
+                ..default()
+            },
+            GameEntity,
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                TextBundle::from_section(
+                    "Score: 0",
+                    TextStyle {
+                        font: asset_server.load("monogram.ttf"),
+                        font_size: 40.0,
+                        color: Color::WHITE,
+                        ..default()
+                    },
+                ),
+                ScoreText,
+            ));
+        });
+
     commands
         .spawn((
             NodeBundle {
@@ -77,6 +111,14 @@ fn spawn_debug_text(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ));
                 });
         });
+}
+
+fn update_score_text(mut query: Query<&mut Text, With<ScoreText>>, score: Res<Score>) {
+    if query.is_empty() {
+        return;
+    }
+    let mut text = query.single_mut();
+    text.sections[0].value = format!("Score: {}", score.0);
 }
 
 fn update_debug_text(

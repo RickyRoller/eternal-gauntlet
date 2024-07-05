@@ -16,6 +16,7 @@ use crate::state::GameState;
 use crate::*;
 
 use self::animation::AnimationIndices;
+use self::resources::Score;
 
 #[derive(Resource, Debug)]
 struct GameTime(f32);
@@ -27,6 +28,7 @@ pub struct EnemiesDataHandle(pub Handle<EnemiesData>);
 pub struct EnemyStats {
     pub health: u32,
     pub damage: f32,
+    pub power: u32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -211,6 +213,7 @@ fn spawn_enemies_system(
                             health: enemy_stats.health
                                 + (enemy_stats.health * (1.2 * spawn_multiplier).floor() as u32),
                             damage: enemy_stats.damage,
+                            power: enemy_stats.power,
                         },
                     ));
                 }
@@ -240,6 +243,7 @@ fn despawn_dead_enemies(
     mut commands: Commands,
     enemy_query: Query<(&Enemy, Entity), With<Enemy>>,
     mut experience_query: Query<&mut Experience, With<Player>>,
+    mut score: ResMut<Score>,
 ) {
     if enemy_query.is_empty() || experience_query.is_empty() {
         return;
@@ -249,6 +253,7 @@ fn despawn_dead_enemies(
     for (enemy, entity) in enemy_query.iter() {
         if enemy.current_health <= 0.0 {
             experience.0 += 1.0;
+            score.0 += 1 * enemy.stats.power;
             commands.entity(entity).despawn();
         }
     }

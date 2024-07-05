@@ -28,12 +28,16 @@ pub struct HeroTextureAtlases {
 }
 
 #[derive(Resource)]
+pub struct Score(pub u32);
+
+#[derive(Resource)]
 pub struct CursorPosition(pub Option<Vec2>);
 
 impl Plugin for ResourcesPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(GlobalTextureAtlas::default())
             .insert_resource(HeroTextureAtlases::default())
+            .insert_resource(Score(0))
             .insert_resource(CursorPosition(None))
             .add_systems(OnEnter(GameState::Loading), load_assets)
             .add_systems(
@@ -157,16 +161,16 @@ impl HeroTextureAtlases {
     pub fn get_hero(&self, hero: &str) -> Option<GlobalTextureAtlas> {
         match hero {
             "doc" => Some(self.doc.clone()),
-            "dwarf_f" => Some(self.dwarf_f.clone()),
-            "dwarf_m" => Some(self.dwarf_m.clone()),
-            "wizzard_f" => Some(self.wizzard_f.clone()),
-            "wizzard_m" => Some(self.wizzard_m.clone()),
-            "elf_f" => Some(self.elf_f.clone()),
-            "elf_m" => Some(self.elf_m.clone()),
-            "knight_f" => Some(self.knight_f.clone()),
-            "knight_m" => Some(self.knight_m.clone()),
-            "lizard_f" => Some(self.lizard_f.clone()),
-            "lizard_m" => Some(self.lizard_m.clone()),
+            "dwarf-f" => Some(self.dwarf_f.clone()),
+            "dwarf-m" => Some(self.dwarf_m.clone()),
+            "wizzard-f" => Some(self.wizzard_f.clone()),
+            "wizzard-m" => Some(self.wizzard_m.clone()),
+            "elf-f" => Some(self.elf_f.clone()),
+            "elf-m" => Some(self.elf_m.clone()),
+            "knight-f" => Some(self.knight_f.clone()),
+            "knight-m" => Some(self.knight_m.clone()),
+            "lizard-f" => Some(self.lizard_f.clone()),
+            "lizard-m" => Some(self.lizard_m.clone()),
             _ => None,
         }
     }
